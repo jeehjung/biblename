@@ -78,7 +78,7 @@
             <div class="flex justify-between items-center text-sm font-bold text-gray-600 mb-1.5 px-1">
                 <div class="flex items-center gap-1 text-purple-600">
                     <span>📖 문제</span>
-                    <span id="current-index" class="text-lg text-purple-700">1</span> / 27
+                    <span id="current-index" class="text-lg text-purple-700">1</span> / <span id="total-count">27</span>
                 </div>
                 <div class="flex items-center gap-1 text-emerald-600">
                     <span>⭐ 맞힘</span>
@@ -98,6 +98,11 @@
 
         <!-- Game Screen -->
         <div id="game-container" class="space-y-4">
+            <!-- Retry Banner Mode indicator -->
+            <div id="retry-banner" class="hidden text-center bg-amber-100 border-2 border-amber-300 text-amber-800 rounded-xl py-1 px-3 text-xs font-bold animate-pulse">
+                🔁 틀린(몰랐던) 문제만 복습하는 중이에요!
+            </div>
+
             <!-- Category Tag -->
             <div class="text-center">
                 <span id="category-badge" class="bg-sky-100 text-sky-700 text-xs sm:text-sm px-3 py-1 rounded-xl font-bold border border-sky-200 shadow-sm inline-flex items-center gap-1">
@@ -177,10 +182,17 @@
                 </div>
             </div>
 
-            <button onclick="restartGame()" 
-                class="w-full py-4 bg-gradient-to-r from-pink-400 to-purple-400 hover:from-pink-500 hover:to-purple-500 active:scale-95 text-white rounded-2xl font-black shadow-lg border-b-4 border-purple-600 transition text-lg flex items-center justify-center gap-2 font-quiz">
-                🔄 순서 섞어서 다시 하기!
-            </button>
+            <!-- Action Buttons for Retry vs Restart -->
+            <div class="space-y-2">
+                <button id="retry-failed-btn" onclick="retryFailedQuestions()" 
+                    class="hidden w-full py-3.5 bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 active:scale-95 text-white rounded-2xl font-black shadow-lg border-b-4 border-orange-600 transition text-base flex items-center justify-center gap-2 font-quiz">
+                    ✏️ 틀린 문제만 다시 풀기 (<span id="failed-count">0</span>개)
+                </button>
+                <button onclick="restartGame()" 
+                    class="w-full py-3.5 bg-gradient-to-r from-pink-400 to-purple-400 hover:from-pink-500 hover:to-purple-500 active:scale-95 text-white rounded-2xl font-black shadow-lg border-b-4 border-purple-600 transition text-base flex items-center justify-center gap-2 font-quiz">
+                    🔄 처음부터 전체 다시 하기
+                </button>
+            </div>
         </div>
 
     </div>
@@ -219,13 +231,16 @@
         ];
 
         let quizData = [];
+        let failedQuestions = []; // 틀린 문제 저장용 배열
         let currentIndex = 0;
         let score = 0;
         let hintCount = 0;
         let timerInterval = null;
         let secondsElapsed = 0;
+        let isRetryMode = false;
 
         const currentIndexEl = document.getElementById("current-index");
+        const totalCountEl = document.getElementById("total-count");
         const scoreEl = document.getElementById("score");
         const timerEl = document.getElementById("timer");
         const progressBar = document.getElementById("progress-bar");
@@ -233,6 +248,7 @@
         const chosungDisplay = document.getElementById("chosung-display");
         const answerDisplay = document.getElementById("answer-display");
         const hintText = document.getElementById("hint-text");
+        const retryBanner = document.getElementById("retry-banner");
 
         const initialControls = document.getElementById("initial-controls");
         const nextControls = document.getElementById("next-controls");
@@ -257,6 +273,8 @@
 
         function initGame() {
             quizData = shuffleArray(rawNewTestamentData);
+            failedQuestions = [];
+            isRetryMode = false;
             currentIndex = 0;
             score = 0;
             hintCount = 0;
@@ -264,8 +282,25 @@
             
             resultContainer.classList.add("hidden");
             gameContainer.classList.remove("hidden");
+            retryBanner.classList.add("hidden");
             
             startTimer();
+            loadQuiz();
+        }
+
+        // 틀린 문제만 모아서 다시 풀기
+        function retryFailedQuestions() {
+            quizData = shuffleArray(failedQuestions);
+            failedQuestions = [];
+            isRetryMode = true;
+            currentIndex = 0;
+            score = 0;
+            scoreEl.textContent = "0";
+            
+            resultContainer.classList.add("hidden");
+            gameContainer.classList.remove("hidden");
+            retryBanner.classList.remove("hidden");
+            
             loadQuiz();
         }
 
@@ -286,6 +321,7 @@
             const currentItem = quizData[currentIndex];
             
             currentIndexEl.textContent = currentIndex + 1;
+            totalCountEl.textContent = quizData.length;
             categoryBadge.innerHTML = `🏷️ ${currentItem.category}`;
             chosungDisplay.textContent = currentItem.chosung;
             answerDisplay.textContent = currentItem.name;
@@ -320,6 +356,9 @@
             if (isKnown) {
                 score++;
                 scoreEl.textContent = score;
+            } else {
+                // 틀린/몰랐던 문제 배열에 축적
+                failedQuestions.push(quizData[currentIndex]);
             }
 
             currentIndex++;
@@ -332,7 +371,9 @@
 
         // 게임 완료 처리
         function finishGame() {
-            clearInterval(timerInterval);
+            if (!isRetryMode) {
+                clearInterval(timerInterval);
+            }
             gameContainer.classList.add("hidden");
             resultContainer.classList.remove("hidden");
 
@@ -340,8 +381,19 @@
             const secs = String(secondsElapsed % 60).padStart(2, '0');
 
             document.getElementById("final-time").textContent = `${mins}:${secs}`;
-            document.getElementById("final-score").textContent = `${score} / 27개`;
+            document.getElementById("final-score").textContent = `${score} / ${quizData.length}개`;
             document.getElementById("final-hints").textContent = `${hintCount}번`;
+
+            // 오답 유무에 따라 버튼 분기 처리
+            const retryBtn = document.getElementById("retry-failed-btn");
+            const failedCountSpan = document.getElementById("failed-count");
+
+            if (failedQuestions.length > 0) {
+                failedCountSpan.textContent = failedQuestions.length;
+                retryBtn.classList.remove("hidden");
+            } else {
+                retryBtn.classList.add("hidden");
+            }
         }
 
         // 게임 재시작
