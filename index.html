@@ -1,0 +1,355 @@
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>어린이 신약성경 초성퀴즈 🎈</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Jua&family=Gamja+Flower&display=swap');
+        
+        body {
+            font-family: 'Jua', sans-serif;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            touch-action: manipulation;
+        }
+
+        .font-quiz {
+            font-family: 'Jua', sans-serif;
+        }
+
+        .cute-card {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(8px);
+            border: 4px solid #FFF;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08), inset 0 0 15px rgba(255, 255, 255, 0.8);
+        }
+
+        .bounce-fun {
+            animation: bounceFun 0.6s infinite alternate cubic-bezier(0.5, 0.05, 0.1, 0.3);
+        }
+
+        @keyframes bounceFun {
+            0% { transform: translateY(0) scale(1); }
+            100% { transform: translateY(-10px) scale(1.03); }
+        }
+
+        .pulse-gentle {
+            animation: pulseGentle 1.5s infinite;
+        }
+
+        @keyframes pulseGentle {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Custom Soft Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #fbcfe8;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-3 sm:p-4 select-none">
+
+    <div class="w-full max-w-md cute-card rounded-[2.5rem] p-5 sm:p-6 relative overflow-hidden my-auto">
+        
+        <!-- Top Cute Decoration Icons -->
+        <div class="absolute -top-3 -left-3 text-3xl opacity-80">🎈</div>
+        <div class="absolute -top-2 -right-2 text-3xl opacity-80">⭐</div>
+
+        <!-- Header -->
+        <div class="text-center mb-4">
+            <span class="inline-flex items-center gap-1 bg-yellow-100 text-yellow-800 text-sm font-bold px-3 py-1 rounded-full border-2 border-yellow-300 shadow-sm mb-1.5">
+                <i class="fa-solid fa-star text-amber-500"></i> 신나는 말씀 퀴즈 <i class="fa-solid fa-star text-amber-500"></i>
+            </span>
+            <h1 class="text-3xl font-extrabold text-pink-500 tracking-wide font-quiz drop-shadow-sm">
+                신약성경 초성퀴즈
+            </h1>
+            <p class="text-xs sm:text-sm text-pink-400 font-bold mt-0.5">초성을 보고 성경 이름을 맞혀봐요! 🐣</p>
+        </div>
+
+        <!-- Progress and Score Bar -->
+        <div class="bg-pink-50 rounded-2xl p-2.5 mb-4 border-2 border-pink-100 shadow-inner">
+            <div class="flex justify-between items-center text-sm font-bold text-gray-600 mb-1.5 px-1">
+                <div class="flex items-center gap-1 text-purple-600">
+                    <span>📖 문제</span>
+                    <span id="current-index" class="text-lg text-purple-700">1</span> / 27
+                </div>
+                <div class="flex items-center gap-1 text-emerald-600">
+                    <span>⭐ 맞힘</span>
+                    <span id="score" class="text-lg text-emerald-600">0</span>개
+                </div>
+                <div class="flex items-center gap-1 text-amber-600">
+                    <i class="fa-solid fa-stopwatch"></i>
+                    <span id="timer" class="text-base">00:00</span>
+                </div>
+            </div>
+
+            <!-- Visual Progress Bar -->
+            <div class="w-full bg-white h-4 rounded-full overflow-hidden p-0.5 border border-pink-200">
+                <div id="progress-bar" class="bg-gradient-to-r from-pink-400 to-yellow-400 h-full rounded-full transition-all duration-300" style="width: 3.7%;"></div>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-container" class="space-y-4">
+            <!-- Category Tag -->
+            <div class="text-center">
+                <span id="category-badge" class="bg-sky-100 text-sky-700 text-xs sm:text-sm px-3 py-1 rounded-xl font-bold border border-sky-200 shadow-sm inline-flex items-center gap-1">
+                    📚 카테고리
+                </span>
+            </div>
+
+            <!-- Chosung & Answer Card -->
+            <div class="bg-gradient-to-b from-sky-50 to-indigo-50 border-4 border-sky-200 rounded-3xl p-5 text-center shadow-md relative min-h-[170px] flex flex-col justify-center items-center gap-2">
+                
+                <!-- Chosung Text -->
+                <div id="chosung-display" class="text-4xl sm:text-5xl font-black text-indigo-600 tracking-widest font-quiz drop-shadow">
+                    ㅁㅌㅂㅇ
+                </div>
+
+                <!-- Answer Text (Initially Hidden) -->
+                <div id="answer-display" class="hidden text-3xl font-black text-emerald-500 font-quiz my-1 bg-white px-5 py-2 rounded-2xl border-3 border-emerald-300 shadow-sm bounce-fun">
+                    마태복음
+                </div>
+
+                <!-- Easy Hint Display -->
+                <div id="hint-text" class="text-xs sm:text-sm text-indigo-500 font-bold mt-1 bg-white/80 px-3 py-1.5 rounded-xl border border-indigo-100 min-h-[2rem] flex items-center justify-center">
+                    <!-- Hint appears here -->
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="space-y-2">
+                <!-- Hint & Reveal Buttons -->
+                <div id="initial-controls" class="grid grid-cols-3 gap-2">
+                    <button type="button" onclick="showHint()" 
+                        class="py-3 bg-amber-400 hover:bg-amber-500 active:scale-95 text-white rounded-2xl font-bold shadow-md border-b-4 border-amber-600 transition text-base flex items-center justify-center gap-1">
+                        💡 힌트!
+                    </button>
+                    <button type="button" onclick="revealAnswer()" 
+                        class="col-span-2 py-3 bg-indigo-500 hover:bg-indigo-600 active:scale-95 text-white rounded-2xl font-bold shadow-md border-b-4 border-indigo-700 transition text-base flex items-center justify-center gap-1 pulse-gentle">
+                        👀 정답 확인하기
+                    </button>
+                </div>
+
+                <!-- Pass / Fail Buttons (Shown after answer revealed) -->
+                <div id="next-controls" class="hidden grid grid-cols-2 gap-2">
+                    <button type="button" onclick="handleNext(false)" 
+                        class="py-3 bg-rose-400 hover:bg-rose-500 active:scale-95 text-white rounded-2xl font-bold shadow-md border-b-4 border-rose-600 transition text-base flex items-center justify-center gap-1">
+                        😅 몰랐어요
+                    </button>
+                    <button type="button" onclick="handleNext(true)" 
+                        class="py-3 bg-emerald-400 hover:bg-emerald-500 active:scale-95 text-white rounded-2xl font-bold shadow-md border-b-4 border-emerald-600 transition text-base flex items-center justify-center gap-1">
+                        👏 알아요!
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="result-container" class="hidden text-center space-y-5 py-3">
+            <div class="text-6xl text-amber-400 bounce-fun">
+                🏆
+            </div>
+            <div>
+                <h2 class="text-3xl font-black text-pink-500 font-quiz">우와! 참 잘했어요!</h2>
+                <p class="text-gray-600 text-sm font-bold mt-1">신약성경 27권을 모두 살펴보았어요! 🎉</p>
+            </div>
+
+            <div class="bg-yellow-50 rounded-2xl p-4 text-left space-y-2 text-sm border-2 border-yellow-200">
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600 font-bold">⏱️ 걸린 시간:</span>
+                    <span id="final-time" class="font-extrabold text-indigo-600 text-base">00:00</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600 font-bold">⭐ 맞힌 개수:</span>
+                    <span id="final-score" class="font-extrabold text-emerald-600 text-base">0 / 27개</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600 font-bold">💡 힌트 사용:</span>
+                    <span id="final-hints" class="font-extrabold text-amber-600 text-base">0번</span>
+                </div>
+            </div>
+
+            <button onclick="restartGame()" 
+                class="w-full py-4 bg-gradient-to-r from-pink-400 to-purple-400 hover:from-pink-500 hover:to-purple-500 active:scale-95 text-white rounded-2xl font-black shadow-lg border-b-4 border-purple-600 transition text-lg flex items-center justify-center gap-2 font-quiz">
+                🔄 순서 섞어서 다시 하기!
+            </button>
+        </div>
+
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // 초등학교 저학년 눈높이에 맞춘 성경 데이터 및 힌트
+        const rawNewTestamentData = [
+            { name: "마태복음", chosung: "ㅁㅌㅂㅇ", category: "예수님 이야기", hint: "신약성경의 가장 첫 번째 책이에요! 📖" },
+            { name: "마가복음", chosung: "ㅁㄱㅂㅇ", category: "예수님 이야기", hint: "복음서 중에서 길이가 가장 짧은 책이에요 ⚡" },
+            { name: "누가복음", chosung: "ㄴㄱㅂㅇ", category: "예수님 이야기", hint: "의사 선생님 '누가'가 적은 예수님 이야기예요 🩺" },
+            { name: "요한복음", chosung: "ㅇㅎㅂㅇ", category: "예수님 이야기", hint: "'하나님이 세상을 이처럼 사랑하사'가 나오는 책이에요 💖" },
+            { name: "사도행전", chosung: "ㅅㄷㅎㅈ", category: "교회 이야기", hint: "예수님의 제자들이 성령님과 함께 전도한 이야기예요 🕊️" },
+            { name: "로마서", chosung: "ㄹㅁㅅ", category: "바울의 편지", hint: "예수님을 믿으면 구원을 받는다는 편지예요 ✉️" },
+            { name: "고린도전서", chosung: "ㄱㄹㄷㅈㅅ", category: "바울의 편지", hint: "유명한 '사랑장(13장)'이 들어있는 편지예요 💖" },
+            { name: "고린도후서", chosung: "ㄱㄹㄷㅎㅅ", category: "바울의 편지", hint: "서로 위로하고 사랑하라는 바울 아저씨의 두 번째 편지 💌" },
+            { name: "갈라디아서", chosung: "ㄱㄹㄷㅇㅅ", category: "바울의 편지", hint: "성령의 9가지 열매(사랑, 희락, 화평...)가 나와요 🍇" },
+            { name: "에베소서", chosung: "ㅇㅂㅅㅅ", category: "바울의 편지", hint: "하나님의 전신갑주(투구, 갑옷, 칼)를 입으라고 해요 🛡️" },
+            { name: "빌립보서", chosung: "ㅂㄹㅂㅅ", category: "바울의 편지", hint: "감옥에서도 '기뻐하라!'고 쓴 기쁨의 편지예요 😄" },
+            { name: "골로새서", chosung: "ㄱㄹㅅㅅ", category: "바울의 편지", hint: "예수님이 최고 으뜸이시라는 편지예요 👑" },
+            { name: "데살로니가전서", chosung: "ㄷㅅㄹㄴㄱㅈㅅ", category: "바울의 편지", hint: "'항상 기뻐하라 쉬지 말고 기도하라'가 나와요  молит" },
+            { name: "데살로니가후서", chosung: "ㄷㅅㄹㄴㄱㅎㅅ", category: "바울의 편지", hint: "예수님이 다시 오실 날을 기다리는 편지예요 ☁️" },
+            { name: "디모데전서", chosung: "ㄷㅁㄷㅈㅅ", category: "바울의 편지", hint: "바울이 아들 같은 믿음의 제자 디모데에게 보낸 편지 👦" },
+            { name: "디모데후서", chosung: "ㄷㅁㄷㅎㅅ", category: "바울의 편지", hint: "바울 아저씨가 마지막으로 써 보낸 보물 같은 편지 📜" },
+            { name: "디도서", chosung: "ㄷㄷㅅ", category: "바울의 편지", hint: "섬에서 일하는 디도에게 착하게 살라고 권면한 편지 🏝️" },
+            { name: "빌레몬서", chosung: "ㅂㄹㅁㅅ", category: "바울의 편지", hint: "용서해 주고 친구로 받아주라고 쓴 아주 짧은 편지 🤝" },
+            { name: "히브리서", chosung: "ㅎㅂㄹㅅ", category: "여러 가지 편지", hint: "예수님이 우리의 진짜 대제사장이라고 가르쳐줘요 ✝️" },
+            { name: "야고보서", chosung: "ㅇㄱㅂㅅ", category: "여러 가지 편지", hint: "말로만 믿지 말고 착한 '행동'으로 보여주라고 해요 🏃" },
+            { name: "베드로전서", chosung: "ㅂㄷㄹㅈㅅ", category: "여러 가지 편지", hint: "힘든 일이 있어도 소망을 가지라고 베드로가 보낸 편지 ⚓" },
+            { name: "베드로후서", chosung: "ㅂㄷㄹㅎㅅ", category: "여러 가지 편지", hint: "거짓말쟁이들을 조심하고 은혜 안에서 자라나라는 편지 🌱" },
+            { name: "요한1서", chosung: "ㅇㅎㅇㅅ", category: "여러 가지 편지", hint: "'하나님은 사랑이심이라' 말씀해 주는 첫 번째 편지 ❤️" },
+            { name: "요한2서", chosung: "ㅇㅎㅇㅅ", category: "여러 가지 편지", hint: "서로 사랑하며 진리 안에서 걸으라는 두 번째 편지 💕" },
+            { name: "요한3서", chosung: "ㅇㅎㅅㅅ", category: "여러 가지 편지", hint: "손님과 친구들을 친절하게 대접하라는 세 번째 편지 ☕" },
+            { name: "유다서", chosung: "ㅇㄷㅅ", category: "여러 가지 편지", hint: "믿음을 잘 지키라고 당부하는 단 1장짜리 편지 🛡️" },
+            { name: "요한계시록", chosung: "ㅇㅎㄱㅅㄹ", category: "미래 이야기", hint: "신약성경의 제일 마지막 책! 새 하늘과 새 땅이 나와요 🌈" }
+        ];
+
+        let quizData = [];
+        let currentIndex = 0;
+        let score = 0;
+        let hintCount = 0;
+        let timerInterval = null;
+        let secondsElapsed = 0;
+
+        const currentIndexEl = document.getElementById("current-index");
+        const scoreEl = document.getElementById("score");
+        const timerEl = document.getElementById("timer");
+        const progressBar = document.getElementById("progress-bar");
+        const categoryBadge = document.getElementById("category-badge");
+        const chosungDisplay = document.getElementById("chosung-display");
+        const answerDisplay = document.getElementById("answer-display");
+        const hintText = document.getElementById("hint-text");
+
+        const initialControls = document.getElementById("initial-controls");
+        const nextControls = document.getElementById("next-controls");
+
+        const gameContainer = document.getElementById("game-container");
+        const resultContainer = document.getElementById("result-container");
+
+        // Fisher-Yates 셔플 알고리즘
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // 게임 시작
+        window.onload = function() {
+            initGame();
+        };
+
+        function initGame() {
+            quizData = shuffleArray(rawNewTestamentData);
+            currentIndex = 0;
+            score = 0;
+            hintCount = 0;
+            scoreEl.textContent = "0";
+            
+            resultContainer.classList.add("hidden");
+            gameContainer.classList.remove("hidden");
+            
+            startTimer();
+            loadQuiz();
+        }
+
+        // 타이머 동작
+        function startTimer() {
+            clearInterval(timerInterval);
+            secondsElapsed = 0;
+            timerInterval = setInterval(() => {
+                secondsElapsed++;
+                const mins = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+                const secs = String(secondsElapsed % 60).padStart(2, '0');
+                timerEl.textContent = `${mins}:${secs}`;
+            }, 1000);
+        }
+
+        // 퀴즈 불러오기
+        function loadQuiz() {
+            const currentItem = quizData[currentIndex];
+            
+            currentIndexEl.textContent = currentIndex + 1;
+            categoryBadge.innerHTML = `🏷️ ${currentItem.category}`;
+            chosungDisplay.textContent = currentItem.chosung;
+            answerDisplay.textContent = currentItem.name;
+            
+            answerDisplay.classList.add("hidden");
+            hintText.innerHTML = "✨ 힌트가 필요하면 아래 '힌트!' 버튼을 누르세요";
+
+            initialControls.classList.remove("hidden");
+            nextControls.classList.add("hidden");
+            
+            // 프로그레스바 업데이트
+            const progressPercent = ((currentIndex + 1) / quizData.length) * 100;
+            progressBar.style.width = `${progressPercent}%`;
+        }
+
+        // 힌트 보기
+        function showHint() {
+            const currentItem = quizData[currentIndex];
+            hintText.innerHTML = `💡 ${currentItem.hint}`;
+            hintCount++;
+        }
+
+        // 정답 공개
+        function revealAnswer() {
+            answerDisplay.classList.remove("hidden");
+            initialControls.classList.add("hidden");
+            nextControls.classList.remove("hidden");
+        }
+
+        // 다음 문제로 이동
+        function handleNext(isKnown) {
+            if (isKnown) {
+                score++;
+                scoreEl.textContent = score;
+            }
+
+            currentIndex++;
+            if (currentIndex < quizData.length) {
+                loadQuiz();
+            } else {
+                finishGame();
+            }
+        }
+
+        // 게임 완료 처리
+        function finishGame() {
+            clearInterval(timerInterval);
+            gameContainer.classList.add("hidden");
+            resultContainer.classList.remove("hidden");
+
+            const mins = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+            const secs = String(secondsElapsed % 60).padStart(2, '0');
+
+            document.getElementById("final-time").textContent = `${mins}:${secs}`;
+            document.getElementById("final-score").textContent = `${score} / 27개`;
+            document.getElementById("final-hints").textContent = `${hintCount}번`;
+        }
+
+        // 게임 재시작
+        function restartGame() {
+            initGame();
+        }
+    </script>
+</body>
+</html>
+```
